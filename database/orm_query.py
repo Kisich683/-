@@ -20,11 +20,32 @@ async def orm_add_user(session: AsyncSession, user_id, chat_id, nick_name):
 
 
 async def on_db(session: AsyncSession, user_id):
-    query = await session.scalar(select(User.user_id))
+    query = select(User.user_id)
+    res = await session.execute(query)
     try:
-        if user_id in query:
+        if user_id in res.scalars().all():
             return True
     except TypeError:
         return False
 
+
+async def orm_go_game(session: AsyncSession, data: dict, user_id):
+    query = update(User).where(User.user_id == user_id).values(
+        come_time=data['come_time'],
+        leave_time=data["leave_time"],
+        in_game=True
+    )
+    await session.execute(query)
+    await session.commit()
+
+
+async def orm_users_in_game(session: AsyncSession):
+    query = select(User).where(User.in_game == True)
+    res = await session.execute(query)
+    a = []
+    count = 1
+    for i in res.scalars().all():
+        a += f'{count}. {i.nick_name} c {i.come_time} до {i.leave_time}\n'
+        count += 1
+    return ''.join(a)
 
