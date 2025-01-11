@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from kbds.reply import get_keyboard
 from kbds.inline import get_callback_btns
 
-from database.orm_query import orm_add_user, on_db, orm_go_game, orm_users_in_game
+from database.orm_query import orm_add_user, on_db, orm_go_game, orm_users_in_game, orm_cancel
 
 
 user_private_router = Router()
@@ -115,5 +115,8 @@ async def users_in_game(mes: Message, session: AsyncSession):
     await mes.answer(f'{users}')
 
 
-
+@user_private_router.message(F.text == 'Отменить запись')
+async def cancel(mes: Message, session: AsyncSession):
+    await orm_cancel(session=session, user_id=mes.from_user.id)
+    await mes.answer(f'{mes}')
 

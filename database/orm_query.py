@@ -49,3 +49,10 @@ async def orm_users_in_game(session: AsyncSession):
         count += 1
     return ''.join(a)
 
+
+async def orm_cancel(session: AsyncSession, user_id):
+    query = update(User).where(User.user_id == user_id).values(
+        in_game=False
+    )
+    await session.execute(query)
+    await session.commit()
