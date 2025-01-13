@@ -8,7 +8,7 @@ from database.models import Base
 
 # engine = create_async_engine(os.getenv('DB_LITE'), echo=True)
 
-engine = create_async_engine('postgresql+asyncpg://kisich:60gafibe@magazin-v-tg-kisich6566.db-msk0.amvera.tech/telegrambd', echo=True)
+engine = create_async_engine(SERVER, echo=True)
 
 session_maker = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
