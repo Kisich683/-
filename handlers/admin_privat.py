@@ -12,7 +12,7 @@ from filters.filters import Admin
 
 from kbds.inline import get_callback_btns
 from kbds.reply import get_keyboard
-bot = Bot(token='7592794682:AAHzauHBKTKcWE4X9v8sSENJYp8uRNfshd4')
+bot = Bot(token)
 ########################### регистрация роутера и навешивание фильтра ##################################
 admin_router = Router()
 admin_router.message.filter(Admin())
