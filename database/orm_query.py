@@ -56,3 +56,21 @@ async def orm_cancel(session: AsyncSession, user_id):
     )
     await session.execute(query)
     await session.commit()
+
+
+async def orm_on_game_false(session: AsyncSession):
+    query = update(User).values(in_game=False)
+    await session.execute(query)
+    await session.commit()
+
+async def orm_get_user(session: AsyncSession):
+    query = select(User.chat_id)
+    result = await session.execute(query)
+    return result.scalars().all()
+
+
+async def user_quantity(session: AsyncSession):
+    query = select(User.user_id)
+    result = await session.execute(query)
+    return len(result.scalars().all())
+
