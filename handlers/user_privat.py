@@ -15,12 +15,11 @@ from database.orm_query import orm_add_user, on_db, orm_go_game, orm_users_in_ga
 user_private_router = Router()
 
 
-USER_KB = get_keyboard(
-            "Записаться",
-            "Отменить запись",
-            "Кто записался",
-            placeholder="Что вас интересует?",
-            sizes=(2, 2))
+USER_KB = get_callback_btns(btns={
+            "Записаться 📝": "Записаться",
+            "Отменить ❌": "Отменить запись",
+            "Список 📋": "Кто записался"},
+            sizes=(1, 2))
 
 
 class Naming(StatesGroup):
@@ -56,10 +55,11 @@ class GoGame(StatesGroup):
     come_time = State()
     leave_time = State()
 
-@user_private_router.message(F.text == 'Записаться', StateFilter(None))
-async def go_to_play(mes: Message, state: FSMContext):
+@user_private_router.callback_query(F.data == 'Записаться', StateFilter(None))
+async def go_to_play(calback: types.CallbackQuery, state: FSMContext):
     await state.set_state(GoGame.come_time)
-    await mes.answer('Когда придешь?', reply_markup=get_callback_btns(btns={
+    await calback.answer()
+    await calback.message.edit_text('Когда придешь?', reply_markup=get_callback_btns(btns={
         '16:00': 'come_16:00',
         '16:30': 'come_16 30',
         '17:00': 'come_17:00',
@@ -101,22 +101,29 @@ async def change_leave_callback(callback: types.CallbackQuery, state: FSMContext
 
     await state.update_data(leave_time=leave_time)
     data = await state.get_data()
-    await orm_go_game(session=session, data=data, user_id=callback.from_user.id)
+    if data['come_time'] >= data['leave_time']:
+        await callback.answer()
+        await callback.message.edit_text('Введено некоректное значение времени, попробуйте записаться заново', reply_markup=USER_KB)
+    else:
+        await orm_go_game(session=session, data=data, user_id=callback.from_user.id)
 
-    await callback.answer()
-    await callback.message.edit_text("Ты записан на игру")
+        await callback.answer()
+        await callback.message.edit_text("Ты записан на игру", reply_markup=USER_KB)
     await state.clear()
 
 
 
-@user_private_router.message(F.text == 'Кто записался')
-async def users_in_game(mes: Message, session: AsyncSession):
+@user_private_router.callback_query(F.data == 'Кто записался')
+async def users_in_game(calback: types.CallbackQuery, session: AsyncSession):
     users = await orm_users_in_game(session=session)
-    await mes.answer(f'{users}')
+    await calback.answer()
+    await calback.message.edit_text(f'На игру записались:\n{users}\nЧто-то еще?', reply_markup=USER_KB)
 
 
-@user_private_router.message(F.text == 'Отменить запись')
-async def cancel(mes: Message, session: AsyncSession):
-    await orm_cancel(session=session, user_id=mes.from_user.id)
-    await mes.answer(f'{mes}')
+@user_private_router.callback_query(F.data == 'Отменить запись')
+async def cancel(callback: types.CallbackQuery, session: AsyncSession):
+    await orm_cancel(session=session, user_id=callback.from_user.id)
+    await callback.answer(show_alert=True, text='Ты действительно этого хотел?')
+    await callback.message.edit_text(f'У вас получилось отменить запись 🥲', reply_markup=USER_KB)
+
 

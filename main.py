@@ -9,13 +9,15 @@ from middlewares.db import DataBaseSession
 from database.engine import create_db, drop_db, session_maker
 
 from handlers.user_privat import user_private_router
+from handlers.admin_privat import admin_router
 
 bot = Bot(token='7750297853:AAGmrKJjS5o-r_G0FaH0XtSNbpOVS6N-ocE', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot.my_admins_list = [333502700, 671851031]
 
 dp = Dispatcher()
 ########################### Регистрация диспетчеров ##################################
 dp.include_router(user_private_router)
-# dp.include_router(admin_router)
+dp.include_router(admin_router)
 
 async def on_startup(bot):
     #await drop_db()
