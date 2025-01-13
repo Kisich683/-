@@ -11,8 +11,8 @@ from database.engine import create_db, drop_db, session_maker
 from handlers.user_privat import user_private_router
 from handlers.admin_privat import admin_router
 
-bot = Bot(token='7592794682:AAHzauHBKTKcWE4X9v8sSENJYp8uRNfshd4', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-bot.my_admins_list = [333502700, 671851031]
+bot = Bot(token=', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot.my_admins_list = [7777777777]
 
 dp = Dispatcher()
 ########################### Регистрация диспетчеров ##################################
